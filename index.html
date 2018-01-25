@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Weather App</title>
+    <script
+  src="https://code.jquery.com/jquery-1.12.4.min.js"
+  integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+  crossorigin="anonymous"></script>
+  <link href="https://fonts.googleapis.com/css?family=Nunito+Sans:600|Roboto+Condensed" rel="stylesheet">
+  <style>
+  *{margin:0;padding:0}
+  a{text-decoration: none}
+  body{background: #5c6bc0}
+  .getLocation{text-align: center;font-family: 'Nunito Sans', sans-serif;font-size: 40px;color:#fff}
+  .trigger{cursor: pointer;color:#111}
+  #place{font-family: "Roboto Condensed"}
+  </style>
+  </head>
+  <body>
+      <div class="getLocation">
+          <h1>Weather App</h1>
+          <br/>
+          <h4 id="place"></h4>
+          <h4><span class="tempdesc"></span></h4>
+          <h4><span class="tempdisplay"></span><a class="trigger">C</a></h4>
+      </div>
+      <script>
+        $(document).ready(function(){
+          var lat = '';
+          var long = '';
+            function getCoordinates()
+            {
+              if(navigator.geolocation)
+              {
+                 navigator.geolocation.getCurrentPosition(getposition);
+              }
+              else {
+                {
+                  alert("Browser Does Not Support Geolocation API");
+                }
+              }
+            }
+            function getposition(position)
+            {
+              lat = position.coords.latitude;
+              long = position.coords.longitude;
+              var jsonurl = 'http://maps.googleapis.com/maps/api/geocode/json?latlng='+lat+',' + long;
+              $.getJSON(jsonurl,function(json)
+              {
+                  getPlaceName(json);
+              });
+              jsonurl = "https://fcc-weather-api.glitch.me/api/current?lat="+lat+"&lon="+long;
+              console.log(jsonurl);
+              $.getJSON(jsonurl,function(json)
+              {
+                  getWeather(json);
+              });
+            }
+            function getPlaceName(json)
+            {
+              var placename = json.results[0].address_components[2]['long_name'];
+              $('#place').text(placename);
+
+            }
+            function getWeather(json){
+              var temparr = [];
+              temparr.push(json.weather[0].description.charAt(0).toUpperCase() + json.weather[0].description.slice(1));
+              temparr.push(json.main.temp);
+              $('.tempdesc').text(temparr[0]);
+              $('.tempdisplay').text(temparr[1]);
+              $(".trigger").click(function(){
+                var triggerVal = $(".trigger").text();
+                var currenttemp =   parseInt($('.tempdisplay').text());
+
+                if(triggerVal=='C')
+                  {
+                      $(".trigger").text("F");
+                      temparr[1] = Math.round(currenttemp*(9/5)+32);
+
+                      $('.tempdisplay').text(temparr[1]);
+
+                  }
+                  else {
+                    {
+                      $(".trigger").text("C");
+                      temparr[1] = Math.round((currenttemp - 32) * (5/9));
+                      $('.tempdisplay').text(temparr[1]);
+                    }
+                  }
+              });
+            }
+          getCoordinates();
+
+        });
+      </script>
+  </body>
+</html>
